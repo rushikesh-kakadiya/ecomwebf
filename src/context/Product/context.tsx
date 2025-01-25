@@ -4,7 +4,6 @@
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
 import { productReducer } from './reducer';
 import { ProductAction, ProductState } from './type';
-import { fetchProductsFailure, fetchProductsRequest, fetchProductsSuccess } from './action';
 
 interface ProductContextProps {
   state: ProductState;
@@ -32,16 +31,6 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     error: null,
   });
 
-  const fetchProducts = async () => {
-    dispatch(fetchProductsRequest());
-    try {
-      const response = await fetch('/api/products');
-      const data = await response.json();
-      dispatch(fetchProductsSuccess(data));
-    } catch (error) {
-      dispatch(fetchProductsFailure('Failed to fetch products'));
-    }
-  };
 
   return (
     <ProductContext.Provider value={{ state, dispatch }}>
