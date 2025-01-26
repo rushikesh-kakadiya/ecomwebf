@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import Cart from "../pages/cart/Cart";
+import { Bars3Icon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { ShoppingCart } from 'lucide-react'; // Import shopping cart icon
+import { useNavigate } from "react-router-dom";
 
 export default function Appbar() {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white">
       <header className="relative">
@@ -67,11 +67,12 @@ export default function Appbar() {
               <button className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
                 <MagnifyingGlassIcon className="h-6 w-6" />
               </button>
-              <div className="flex items-center space-x-6">
-                <button className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
-                  <MagnifyingGlassIcon className="h-6 w-6" />
-                </button>
-                <Cart />
+              <div
+                onClick={() => navigate("/cart")}
+                className="flex items-center justify-center p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                title="View Cart"
+              >
+                <ShoppingCart className="w-6 h-6" />
               </div>
             </div>
           </div>

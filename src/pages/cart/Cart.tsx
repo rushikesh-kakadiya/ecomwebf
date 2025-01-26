@@ -1,41 +1,48 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API_ENDPOINT } from '../../config/constants';
 import { useNavigate } from 'react-router-dom';
 
-interface CartItem {
-  id: number;
-  Product: {
-    name: string;
-    price: number;
-    image_url: string;
-  };
-  quantity: number;
-}
-
-const Cart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const cartRef = useRef<HTMLDivElement>(null); // Reference for the cart dropdown
-  const navigate = useNavigate();
+const CartPage: React.FC = () => {
+  const [cartItems, setCartItems] = useState<any[]>([]);
 
   const fetchCartItems = async () => {
     try {
       const response = await fetch(`${API_ENDPOINT}/api/cart`, {
-        method: 'GET',
-        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch cart items');
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data);
+      } else {
+        console.error('Failed to fetch cart items');
       }
-
-      const data: CartItem[] = await response.json();
-      setCartItems(data);
     } catch (error) {
       console.error('Error fetching cart items:', error);
+    }
+  };
+
+  const updateCartItemSelection = async (cartItemId: number, isSelected: boolean) => {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/api/cart/select/${cartItemId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ cartItemId, isSelected }),
+      });
+      console.log(response);
+      
+      if (response.ok) {
+        fetchCartItems(); // Refresh cart items
+      } else {
+        console.error('Failed to update cart item selection');
+      }
+    } catch (error) {
+      console.error('Error updating cart item selection:', error);
     }
   };
 
@@ -43,23 +50,18 @@ const Cart = () => {
     try {
       const response = await fetch(`${API_ENDPOINT}/api/cart/${cartItemId}`, {
         method: 'PUT',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ quantity }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update cart item quantity');
+      if (response.ok) {
+        fetchCartItems(); // Refresh cart items
+      } else {
+        console.error('Failed to update cart item quantity');
       }
-
-      const updatedCartItem = await response.json();
-      setCartItems((prevItems) =>
-        prevItems.map((item) =>
-          item.id === cartItemId ? { ...item, quantity: updatedCartItem.cartItem.quantity } : item
-        )
-      );
     } catch (error) {
       console.error('Error updating cart item quantity:', error);
     }
@@ -69,139 +71,129 @@ const Cart = () => {
     try {
       const response = await fetch(`${API_ENDPOINT}/api/cart/${cartItemId}`, {
         method: 'DELETE',
-        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete cart item');
+      if (response.ok) {
+        fetchCartItems(); // Refresh cart items
+      } else {
+        console.error('Failed to delete cart item');
       }
-
-      setCartItems((prevItems) => prevItems.filter((item) => item.id !== cartItemId));
     } catch (error) {
       console.error('Error deleting cart item:', error);
     }
   };
 
-  const toggleCart = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      fetchCartItems();
-    }
-  };
-
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.Product.price * item.quantity, 0);
-  };
-
-  const handleCheckout = () => {
-    const totalPrice = calculateTotal();
-    localStorage.setItem('totalPrice', totalPrice.toString());
-    navigate('/checkout');
-  };
-
-  // Close cart when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    fetchCartItems();
   }, []);
+  const navigate = useNavigate();
 
   return (
-    <div className="relative">
-      <button
-        className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none"
-        onClick={toggleCart}
-      >
-        🛒
-      </button>
+    <div className="max-w-5xl mx-auto p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Shopping Cart</h1>
 
-      {isOpen && (
-        <div
-          ref={cartRef}
-          className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 z-50"
-        >
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Cart</h3>
-            <button
-              className="text-gray-500 hover:text-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              ✖
-            </button>
-          </div>
+      {cartItems.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Cart Items */}
+          <div className="col-span-2 bg-white p-4 rounded-lg shadow-md">
+            {cartItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4"
+              >
+                <img
+                  src={`data:image/png;base64,${item.Product.image_url}`}
+                  alt={item.Product.name}
+                  className="w-16 h-16 object-cover rounded-md"
+                />
+                <div className="flex-1 ml-4">
+                  <h2 className="font-medium text-gray-800">{item.Product.name}</h2>
+                  <p className="text-sm text-gray-500">
+                    ₹{item.Product.price} x {item.quantity}
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={item.isSelected}
+                    onChange={(e) => updateCartItemSelection(item.id, e.target.checked)}
+                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Select</span>
+                </div>
 
-          {cartItems.length > 0 ? (
-            <>
-              <ul className="divide-y divide-gray-200 mt-2">
-                {cartItems.map((item) => (
-                  <li key={item.id} className="py-2 flex items-center">
-                    <img
-                      src={`data:image/png;base64,${item.Product.image_url}`}
-                      alt={item.Product.name}
-                      className="h-12 w-12 object-cover rounded-md"
-                    />
-                    <div className="ml-3 flex-1">
-                      <p className="text-sm font-medium text-gray-900">{item.Product.name}</p>
-                      <p className="text-sm text-gray-500">
-                        ₹{item.Product.price} x {item.quantity}
-                      </p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <button
-                          className="px-2 py-1 bg-gray-200 text-gray-700 rounded"
-                          onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                        >
-                          -
-                        </button>
-                        <span className="px-3">{item.quantity}</span>
-                        <button
-                          className="px-2 py-1 bg-gray-200 text-gray-700 rounded"
-                          onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <button
-                      className="ml-3 text-red-500 hover:text-red-700"
-                      onClick={() => deleteCartItem(item.id)}
-                    >
-                      🗑
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                {/* Update quantity */}
+                <div className="flex items-center ml-4">
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded-full text-gray-700"
+                    onClick={() => item.quantity > 1 && updateCartItemQuantity(item.id, item.quantity - 1)}
+                  >
+                    -
+                  </button>
+                  <span className="mx-2 text-sm text-gray-700">{item.quantity}</span>
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded-full text-gray-700"
+                    onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                  >
+                    +
+                  </button>
+                </div>
 
-              <div className="mt-4">
-                <p className="text-lg font-semibold text-gray-900">
-                  Total: ₹{calculateTotal().toFixed(2)}
-                </p>
+                {/* Delete item */}
                 <button
-                  className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  onClick={handleCheckout}
+                  className="text-red-600 hover:text-red-700"
+                  onClick={() => deleteCartItem(item.id)}
                 >
-                  Checkout
+                  Delete
                 </button>
               </div>
-            </>
-          ) : (
-            <p className="text-sm text-gray-500 mt-4">Your cart is empty</p>
-          )}
+            ))}
+          </div>
+
+          {/* Summary Section */}
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
+            <p className="text-sm text-gray-600 mb-2">
+              Selected Items:{" "}
+              {
+                cartItems.filter((item) => item.isSelected).reduce(
+                  (total, item) => total + item.quantity,
+                  0
+                )
+              }
+            </p>
+            <p className="text-lg font-semibold text-gray-800">
+              Total Price: ₹
+              {cartItems
+                .filter((item) => item.isSelected)
+                .reduce(
+                  (total, item) => total + item.Product.price * item.quantity,
+                  0
+                )
+                .toFixed(2)}
+            </p>
+            <button
+              className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+              disabled={cartItems.filter((item) => item.isSelected).length === 0}
+              onClick={() => navigate("/CheckOut")}
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-xl font-medium text-gray-700">Your cart is empty</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Add items to your cart and they will appear here.
+          </p>
         </div>
       )}
     </div>
   );
 };
 
-export default Cart;
+export default CartPage;

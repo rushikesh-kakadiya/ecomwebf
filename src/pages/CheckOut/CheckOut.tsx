@@ -1,62 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { API_ENDPOINT } from '../../config/constants';
-
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_ENDPOINT } from "../../config/constants";
+import { loadStripe } from "@stripe/stripe-js";
 const CheckoutPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [shippingAddress, setShippingAddress] = useState({
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: '',
-  });
+  const [shippingAddress, setShippingAddress] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Fetch cart items
-  const fetchCartItems = async () => {
+  // Fetch selected cart items
+  const fetchSelectedCartItems = async () => {
     try {
-      const response = await fetch(`${API_ENDPOINT}/api/cart`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      const response = await fetch(`${API_ENDPOINT}/api/cart/selected`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch cart items');
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data);
+
+        // Calculate total price
+        const total = data.reduce(
+          (acc: number, item: any) => acc + item.Product.price * item.quantity,
+          0
+        );
+        setTotalPrice(total);
+      } else {
+        console.error("Failed to fetch selected cart items");
       }
-
-      const data = await response.json();
-      setCartItems(data);
-
-      // Calculate total price
-      const total = data.reduce(
-        (acc: number, item: any) => acc + item.Product.price * item.quantity,
-        0
-      );
-      setTotalPrice(total);
     } catch (error) {
-      console.error('Failed to fetch cart items:', error);
+      console.error("Error fetching selected cart items:", error);
+    }
+  };
+
+  // Fetch user shipping address
+  const fetchUserAddress = async () => {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/api/user/address`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setShippingAddress(data);
+      } else {
+        console.error("Failed to fetch user shipping address");
+      }
+    } catch (error) {
+      console.error("Error fetching user shipping address:", error);
     }
   };
 
   useEffect(() => {
-    fetchCartItems();
+    fetchSelectedCartItems();
+    fetchUserAddress();
   }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShippingAddress({
-      ...shippingAddress,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleCheckout = async () => {
     try {
+      const stripe = await loadStripe(
+        "pk_test_51QlQdDPNTVHlmdDrI8WLk8PIllKbz6pDICPTZvqmZrL7lKsEIFKVtBPDSQgQgwzh6w1b3RGzM0aHy2H6SE1eNZl400lojz9lbJ"
+      );
+  
+      // Ensure stripe is properly loaded before proceeding
+      if (!stripe) {
+        throw new Error("Stripe failed to load");
+      }
+  
+      // Make a request to create an order
       const response = await fetch(`${API_ENDPOINT}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure you are handling token correctly
         },
         body: JSON.stringify({
           cart_items: cartItems,
@@ -64,31 +84,42 @@ const CheckoutPage: React.FC = () => {
           shipping_address: shippingAddress,
         }),
       });
-
-      if (response.ok) {
-        alert('Order placed successfully!');
-
-        // Remove checked-out items from the cart by calling the DELETE endpoint
-        for (const item of cartItems) {
-          await fetch(`${API_ENDPOINT}/api/cart/${item.id}`, {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          });
-        }
-
-        setCartItems([]); // Clear cart items after deletion
-        navigate('/orders'); // Navigate to the orders page
-      } else {
+  
+      // Check for response validity before processing
+      if (!response.ok) {
         const error = await response.json();
-        alert(`Checkout failed: ${error.message}`);
+        throw new Error(`Checkout failed: ${error.message}`);
       }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert('An error occurred during checkout. Please try again.');
+  
+      const session = await response.json();
+      console.log(session);
+      
+      // Redirect to Stripe Checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.sessionId,
+      });
+  
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+  
+      // After successful checkout session redirection
+      alert('Order placed successfully!');
+      navigate('/orders');
+      
+    } catch (error: unknown) {
+      console.error("Checkout error:", error);
+  
+      // Type assertion to handle error as an instance of Error
+      if (error instanceof Error) {
+        alert(`An error occurred during checkout. Please try again. ${error.message}`);
+      } else {
+        alert("An unknown error occurred during checkout. Please try again.");
+      }
     }
   };
+  
+  
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -100,7 +131,9 @@ const CheckoutPage: React.FC = () => {
         <div className="space-y-4">
           {cartItems.map((item) => (
             <div key={item.id} className="flex justify-between">
-              <span>{item.Product.name} (x{item.quantity})</span>
+              <span>
+                {item.Product.name} (x{item.quantity})
+              </span>
               <span>₹{(item.Product.price * item.quantity).toFixed(2)}</span>
             </div>
           ))}
@@ -113,61 +146,22 @@ const CheckoutPage: React.FC = () => {
       </div>
 
       {/* Shipping Address */}
-      <div className="mb-6">
-        <h2 className="text-xl font-medium mb-2">Shipping Address</h2>
-        <form className="grid grid-cols-1 gap-4">
-          <input
-            type="text"
-            name="address"
-            placeholder="Address"
-            className="p-2 border rounded"
-            value={shippingAddress.address}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            className="p-2 border rounded"
-            value={shippingAddress.city}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="state"
-            placeholder="State"
-            className="p-2 border rounded"
-            value={shippingAddress.state}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="postalCode"
-            placeholder="Postal Code"
-            className="p-2 border rounded"
-            value={shippingAddress.postalCode}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="country"
-            placeholder="Country"
-            className="p-2 border rounded"
-            value={shippingAddress.country}
-            onChange={handleInputChange}
-            required
-          />
-        </form>
-      </div>
+      {shippingAddress && (
+        <div className="mb-6">
+          <h2 className="text-xl font-medium mb-2">Shipping Address</h2>
+          <p>
+            {shippingAddress.address}, {shippingAddress.city},{" "}
+            {shippingAddress.state}, {shippingAddress.postalCode},{" "}
+            {shippingAddress.country}
+          </p>
+        </div>
+      )}
 
       {/* Checkout Button */}
       <button
         className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
         onClick={handleCheckout}
+        disabled={cartItems.length === 0}
       >
         Place Order
       </button>

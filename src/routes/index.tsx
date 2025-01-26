@@ -4,6 +4,9 @@ import ViewProduct from "../pages/products/ViewProduct";
 import Products from "../pages/products/Products";
 import CheckoutPage from "../pages/CheckOut/CheckOut";
 import Orders from "../pages/orders/Orders";
+import CartPage from "../pages/cart/Cart";
+import SuccessPage from "../layouts/success";
+import FailurePage from "../layouts/failure";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +32,18 @@ const router = createBrowserRouter([
       {
         path: "orders", // Products page
         element: <Orders />,
+      },
+      {
+        path: "cart", // Products page
+        element: <CartPage />,
+      },
+      {
+        path: "success", // Products page
+        element: <SuccessPage />,
+      },
+      {
+        path: "failure", // Products page
+        element: <FailurePage />,
       },
     ],
   },
