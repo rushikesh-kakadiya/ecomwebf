@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_ENDPOINT } from "../../config/constants";
 import { loadStripe } from "@stripe/stripe-js";
+/// <reference types="vite/client" />
+
 const CheckoutPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -62,9 +64,10 @@ const CheckoutPage: React.FC = () => {
 
   const handleCheckout = async () => {
     try {
-      const stripe = await loadStripe(
-        "pk_test_51QlQdDPNTVHlmdDrI8WLk8PIllKbz6pDICPTZvqmZrL7lKsEIFKVtBPDSQgQgwzh6w1b3RGzM0aHy2H6SE1eNZl400lojz9lbJ"
-      );
+
+      const stripe_key = import.meta.env.VITE_STRIPE_KEY;
+
+      const stripe = await loadStripe(stripe_key);
   
       // Ensure stripe is properly loaded before proceeding
       if (!stripe) {
