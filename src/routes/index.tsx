@@ -7,15 +7,31 @@ import Orders from "../pages/orders/Orders";
 import CartPage from "../pages/cart/Cart";
 import SuccessPage from "../layouts/success";
 import FailurePage from "../layouts/failure";
+import SigninForm from "../pages/signin/Signin";
+import SignupForm from "../pages/signup/Signup";
+import Logout from "../pages/logout/Logout";
+import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
+  {
+    path: "/signin",
+    element: <SigninForm />,
+  },
+  {
+    path: "/signup",
+    element: <SignupForm />,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
+  },
   {
     path: "/",
     element: <HomePage />, // HomePage with Appbar for all routes
     children: [
       {
         path: "/", // Home route
-        element: <Products/>, // Replace with actual home content
+        element: <Products />, // Public route
       },
       {
         path: "products", // Products page
@@ -26,24 +42,24 @@ const router = createBrowserRouter([
         element: <ViewProduct />,
       },
       {
-        path: "checkout", // Products page
-        element: <CheckoutPage />,
+        path: "checkout", // Checkout requires authentication
+        element: <ProtectedRoute element={<CheckoutPage />} />,
       },
       {
-        path: "orders", // Products page
-        element: <Orders />,
+        path: "orders", // Orders require authentication
+        element: <ProtectedRoute element={<Orders />} />,
       },
       {
-        path: "cart", // Products page
-        element: <CartPage />,
+        path: "cart", // Cart page requires authentication
+        element: <ProtectedRoute element={<CartPage />} />,
       },
       {
-        path: "success", // Products page
-        element: <SuccessPage />,
+        path: "success", // Success page
+        element: <ProtectedRoute element={<SuccessPage />} />,
       },
       {
-        path: "failure", // Products page
-        element: <FailurePage />,
+        path: "failure", // Failure page
+        element: <FailurePage />, // No protection needed
       },
     ],
   },

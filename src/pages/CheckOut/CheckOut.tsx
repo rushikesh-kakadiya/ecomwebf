@@ -64,22 +64,18 @@ const CheckoutPage: React.FC = () => {
 
   const handleCheckout = async () => {
     try {
-
       const stripe_key = import.meta.env.VITE_STRIPE_KEY;
-
       const stripe = await loadStripe(stripe_key);
   
-      // Ensure stripe is properly loaded before proceeding
       if (!stripe) {
         throw new Error("Stripe failed to load");
       }
   
-      // Make a request to create an order
       const response = await fetch(`${API_ENDPOINT}/api/orders`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure you are handling token correctly
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           cart_items: cartItems,
@@ -88,15 +84,14 @@ const CheckoutPage: React.FC = () => {
         }),
       });
   
-      // Check for response validity before processing
       if (!response.ok) {
         const error = await response.json();
         throw new Error(`Checkout failed: ${error.message}`);
       }
   
       const session = await response.json();
-      console.log(session);
-      
+      await deleteSelectedCartItems();
+
       // Redirect to Stripe Checkout
       const result = await stripe.redirectToCheckout({
         sessionId: session.sessionId,
@@ -106,14 +101,13 @@ const CheckoutPage: React.FC = () => {
         throw new Error(result.error.message);
       }
   
-      // After successful checkout session redirection
-      alert('Order placed successfully!');
-      navigate('/orders');
-      
+      // Delete only selected cart items after successful checkout
+  
+      alert("Order placed successfully!");
+      navigate("/orders");
     } catch (error: unknown) {
       console.error("Checkout error:", error);
   
-      // Type assertion to handle error as an instance of Error
       if (error instanceof Error) {
         alert(`An error occurred during checkout. Please try again. ${error.message}`);
       } else {
@@ -121,6 +115,45 @@ const CheckoutPage: React.FC = () => {
       }
     }
   };
+  
+  // Function to delete only selected cart items
+  const deleteSelectedCartItems = async () => {
+    try {
+      // Filter selected cart items
+      const selectedItems = cartItems.filter((item) => item.isSelected);
+      console.log(selectedItems)
+      
+      // Delete each selected item
+      for (const item of selectedItems) {
+        await deleteCartItem(item.id);
+      }
+  
+      // Refresh cart items in the local state
+      setCartItems((prevItems) => prevItems.filter((item) => !item.isSelected));
+    } catch (error) {
+      console.error("Error deleting selected cart items:", error);
+    }
+  };
+  
+  // Function to delete a single cart item
+  const deleteCartItem = async (cartItemId: number) => {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/api/cart/${cartItemId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+  
+      if (!response.ok) {
+        console.error(`Failed to delete cart item with ID: ${cartItemId}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting cart item with ID: ${cartItemId}`, error);
+    }
+  };
+  
+  
   
   
 

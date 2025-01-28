@@ -13,6 +13,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Gradient background added to the body */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+
+  /* Tailwind gradient class utilities applied */
+  @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

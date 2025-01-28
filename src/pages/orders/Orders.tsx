@@ -34,7 +34,11 @@ const Orders: React.FC = () => {
   const getAllOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINT}/api/orders`);
+      const response = await fetch(`${API_ENDPOINT}/api/orders`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch orders");
       }

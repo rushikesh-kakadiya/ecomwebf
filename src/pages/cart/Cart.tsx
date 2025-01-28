@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
-
+  const token = localStorage.getItem('token');
+  
   const fetchCartItems = async () => {
     try {
       const response = await fetch(`${API_ENDPOINT}/api/cart`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -30,7 +31,7 @@ const CartPage: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ cartItemId, isSelected }),
       });
@@ -52,7 +53,7 @@ const CartPage: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ quantity }),
       });
@@ -72,7 +73,7 @@ const CartPage: React.FC = () => {
       const response = await fetch(`${API_ENDPOINT}/api/cart/${cartItemId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

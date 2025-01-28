@@ -1,25 +1,57 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Bars3Icon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { ShoppingCart } from 'lucide-react'; // Import shopping cart icon
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import { ShoppingCart } from "lucide-react"; // Import shopping cart icon
+import { Menu, Transition } from "@headlessui/react";
+import UserCircleIcon from "@heroicons/react/24/outline/UserCircleIcon";
+import { Fragment, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+
+interface NavigationItem {
+  name: string;
+  href: string;
+}
+
+const classNames = (...classes: string[]): string =>
+  classes.filter(Boolean).join(" ");
 
 export default function Appbar() {
   const navigate = useNavigate();
+  const [userNavigation, setUserNavigation] = useState<NavigationItem[]>([]);
+  const authenticated = !!localStorage.getItem("token");
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    updateUserNavigation(authenticated);
+  }, [authenticated, i18n.language]);
+
+  const updateUserNavigation = (isAuthenticated: boolean) => {
+    const updatedNavigation = isAuthenticated
+      ? [
+          { name: t("Profile"), href: "#" },
+          { name: t("Sign out"), href: "/logout" },
+        ]
+      : [
+          { name: t("Sign in"), href: "/signin" },
+          { name: t("Sign up"), href: "/signup" },
+        ];
+    setUserNavigation(updatedNavigation);
+  };
 
   return (
     <div className="bg-white">
       <header className="relative">
         {/* Announcement Banner */}
-        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white">
+        <p className="flex h-10 items-center justify-center bg-indigo-600 text-sm font-medium text-white">
           Free shipping on all orders above ₹1000!
         </p>
 
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile Menu Button */}
-            <button className="p-2 text-gray-400 lg:hidden focus:outline-none hover:text-gray-600">
+            <button className="p-2 text-gray-400 lg:hidden hover:text-gray-600 focus:outline-none">
               <Bars3Icon className="h-6 w-6" />
             </button>
 
@@ -62,14 +94,48 @@ export default function Appbar() {
               </a>
             </div>
 
-            {/* Right Icons */}
+            {/* Right Section: User Menu and Cart */}
             <div className="flex items-center space-x-6">
-              <button className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
-                <MagnifyingGlassIcon className="h-6 w-6" />
-              </button>
+              {/* User Menu */}
+              <div className="relative">
+                <Menu>
+                  <Menu.Button className="p-2 text-gray-700 rounded-full hover:text-indigo-600 focus:outline-none">
+                    <UserCircleIcon className="h-6 w-6" aria-hidden="true" />
+                  </Menu.Button>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      {userNavigation.map((item) => (
+                        <Menu.Item key={item.name}>
+                          {({ active }) => (
+                            <a
+                              href={item.href}
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-700"
+                              )}
+                            >
+                              {item.name}
+                            </a>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              </div>
+
+              {/* Cart Icon */}
               <div
                 onClick={() => navigate("/cart")}
-                className="flex items-center justify-center p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                className="relative flex items-center justify-center p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
                 title="View Cart"
               >
                 <ShoppingCart className="w-6 h-6" />

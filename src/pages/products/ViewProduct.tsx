@@ -17,6 +17,7 @@ const ViewProduct = () => {
   const { id } = useParams<{ id: string }>(); // Add type annotation for useParams
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
 
   // Cart state (for demonstration, using local state)
 
@@ -51,7 +52,8 @@ const ViewProduct = () => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-        },
+          Authorization: `Bearer ${token}`,
+         },
       });
 
       if (!response.ok) {
@@ -72,6 +74,7 @@ const ViewProduct = () => {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             product_id: product.id,
