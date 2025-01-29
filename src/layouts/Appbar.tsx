@@ -8,6 +8,7 @@ import UserCircleIcon from "@heroicons/react/24/outline/UserCircleIcon";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINT } from "../config/constants";
 
 interface NavigationItem {
   name: string;
@@ -22,10 +23,32 @@ export default function Appbar() {
   const [userNavigation, setUserNavigation] = useState<NavigationItem[]>([]);
   const authenticated = !!localStorage.getItem("token");
   const { t, i18n } = useTranslation();
+  const token = localStorage.getItem("token");
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const checkAdminRole = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/api/users/role`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        setIsAdmin(data.isAdmin); // Set state based on role
+      } catch (error) {
+        console.error("Error fetching role:", error);
+        setIsAdmin(false); // Default to non-admin if error occurs
+      }
+    };
+
+    if (token) {
+      checkAdminRole();
+    } else {
+      setIsAdmin(false); // If no token, assume user is not authenticated
+    }
     updateUserNavigation(authenticated);
-  }, [authenticated, i18n.language]);
+  }, [authenticated, i18n.language, token]);
 
   const updateUserNavigation = (isAuthenticated: boolean) => {
     const updatedNavigation = isAuthenticated
@@ -75,23 +98,26 @@ export default function Appbar() {
                 Home
               </a>
               <a
-                href="/about"
-                className="text-sm font-medium text-gray-700 hover:text-indigo-600"
-              >
-                About
-              </a>
-              <a
-                href="/contact"
-                className="text-sm font-medium text-gray-700 hover:text-indigo-600"
-              >
-                Contact
-              </a>
-              <a
                 href="/orders"
                 className="text-sm font-medium text-gray-700 hover:text-indigo-600"
               >
                 My Orders
               </a>
+              <a
+                href="/mywishlist"
+                className="text-sm font-medium text-gray-700 hover:text-indigo-600"
+              >
+                My Wishlist
+              </a>
+              {/* Conditionally render Admin link */}
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600"
+                >
+                  Admin Dashboard
+                </a>
+              )}
             </div>
 
             {/* Right Section: User Menu and Cart */}
@@ -161,23 +187,26 @@ export default function Appbar() {
             Products
           </a>
           <a
-            href="/about"
-            className="block text-sm font-medium text-gray-700 hover:text-indigo-600"
-          >
-            About
-          </a>
-          <a
-            href="/contact"
-            className="block text-sm font-medium text-gray-700 hover:text-indigo-600"
-          >
-            Contact
-          </a>
-          <a
             href="/orders"
             className="block text-sm font-medium text-gray-700 hover:text-indigo-600"
           >
             My Orders
           </a>
+          <a
+            href="/mywishlist"
+            className="block text-sm font-medium text-gray-700 hover:text-indigo-600"
+          >
+            My Wishlist
+          </a>
+          {/* Conditionally render Admin link */}
+          {isAdmin && (
+            <a
+              href="/admin"
+              className="block text-sm font-medium text-gray-700 hover:text-indigo-600"
+            >
+              Admin Dashboard
+            </a>
+          )}
         </div>
       </div>
     </div>

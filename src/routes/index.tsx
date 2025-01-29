@@ -13,16 +13,9 @@ import Logout from "../pages/logout/Logout";
 import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/admin/Admin";
 import PrivateRoute from "./PrivateRoute";
+import MyWishlist from "../pages/mywishlist/MyWishlist";
 
 const router = createBrowserRouter([
-  {
-    path: "/admin",
-    element: (
-      <PrivateRoute>
-        <Dashboard />
-      </PrivateRoute>
-    ),
-  },
   {
     path: "/signin",
     element: <SigninForm />,
@@ -42,6 +35,14 @@ const router = createBrowserRouter([
       {
         path: "/", // Home route
         element: <Products />, // Public route
+      },
+      {
+        path: "/admin",
+        element: (
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        ),
       },
       {
         path: "products", // Products page
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "success", // Success page
         element: <ProtectedRoute element={<SuccessPage />} />,
+      },
+      {
+        path: "mywishlist", // Success page
+        element: <ProtectedRoute element={<MyWishlist />} />,
       },
       {
         path: "failure", // Failure page
