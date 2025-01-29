@@ -11,8 +11,18 @@ import SigninForm from "../pages/signin/Signin";
 import SignupForm from "../pages/signup/Signup";
 import Logout from "../pages/logout/Logout";
 import ProtectedRoute from "./ProtectedRoute";
+import Dashboard from "../pages/admin/Admin";
+import PrivateRoute from "./PrivateRoute";
 
 const router = createBrowserRouter([
+  {
+    path: "/admin",
+    element: (
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    ),
+  },
   {
     path: "/signin",
     element: <SigninForm />,

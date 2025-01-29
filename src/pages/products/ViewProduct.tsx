@@ -1,9 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { API_ENDPOINT } from "../../config/constants";
+import { Transition } from "@headlessui/react";
+import { HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
+import { useWishlist } from "../../hooks/useWishlist";  // Import the hook
+import { useCart } from "../../hooks/useCart";
 
-// Define the interface for a Product
+// Define interfaces
 interface Product {
   id: string;
   name: string;
@@ -14,116 +18,49 @@ interface Product {
 }
 
 const ViewProduct = () => {
-  const { id } = useParams<{ id: string }>(); // Add type annotation for useParams
+  const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('token');
+  const { wishlist, handleWishlist } = useWishlist();
+  const { addToCart } = useCart(); // Use the cart hook
 
-  // Cart state (for demonstration, using local state)
+  useEffect(() => {
+    if (id) {
+      fetchProduct(id);
+    }
+  }, [id]);
 
-  // Function to fetch product details based on ID
-  const fetchProduct = async (id: string): Promise<Product | null> => {
+  const isInWishlist = wishlist.some(
+    (item) => item.product_id === Number(product?.id)
+  );
+
+  // Fetch Product Details
+  const fetchProduct = async (id: string) => {
     try {
       const response = await fetch(`${API_ENDPOINT}/api/products/${id}`, {
         method: "GET",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch product");
-      }
+      if (!response.ok) throw new Error("Failed to fetch product");
 
       const data: Product = await response.json();
-      return data;
+      setProduct(data);
     } catch (error) {
       console.error("Error fetching product:", error);
-      return null;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Function to fetch the cart items
-  const fetchCart = async () => {
-    try {
-      const response = await fetch(`${API_ENDPOINT}/api/cart`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-         },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart items");
-      }
-
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-    }
-  };
-
-  // Function to add product to the cart
-  const handleAddToCart = async () => {
-    if (product) {
-      try {
-        const response = await fetch(`${API_ENDPOINT}/api/cart`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            product_id: product.id,
-            quantity: 1, // Default quantity of 1
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to add product to cart");
-        }
-
-        const data = await response.json();
-        alert(data.message); // Show success message
-        fetchCart(); // Refresh cart items
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const loadProduct = async () => {
-      if (id) {
-        const data = await fetchProduct(id);
-        setProduct(data);
-        setLoading(false);
-      }
-    };
-
-    loadProduct();
-  }, [id]);
-
-  useEffect(() => {
-    fetchCart(); // Fetch cart items on component mount
-  }, []);
-
-  // Calculate total cart item count
-
-  if (loading) {
-    return <p>Loading product...</p>;
-  }
-
-  if (!product) {
-    return <p>Product not found</p>;
-  }
+  if (loading) return <p>Loading product...</p>;
+  if (!product) return <p>Product not found</p>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div className="lg:grid lg:grid-cols-2 lg:gap-12">
+        {/* Product Image */}
         <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 lg:aspect-none">
           <img
             src={`data:image/png;base64, ${product.image_url}`}
@@ -132,37 +69,51 @@ const ViewProduct = () => {
           />
         </div>
 
+        {/* Product Details */}
         <div className="mt-6 lg:mt-0 lg:col-span-1">
-          <h1 className="text-3xl font-extrabold text-gray-900">
-            {product.name}
-          </h1>
+          <h1 className="text-3xl font-extrabold text-gray-900">{product.name}</h1>
           <p className="mt-3 text-lg text-gray-500">{product.category}</p>
-          <p className="mt-4 text-xl font-medium text-gray-900">
-            ${product.price}
-          </p>
+          <p className="mt-4 text-xl font-medium text-gray-900">${product.price}</p>
 
+          {/* Product Description */}
           <div className="mt-6">
             <h2 className="text-lg font-medium text-gray-900">Description</h2>
-            <p className="mt-2 text-base text-gray-700">
-              {product.description}
-            </p>
+            <p className="mt-2 text-base text-gray-700">{product.description}</p>
           </div>
 
-          <div className="mt-6">
+          {/* Buttons: Add to Cart & Wishlist */}
+          <div className="mt-6 flex items-center space-x-4">
             <button
-              className="inline-block bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700"
-              onClick={handleAddToCart}
+              className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700"
+              onClick={() => addToCart(product.id)} // Call addToCart from hook
             >
               Add to Cart
+            </button>
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => handleWishlist(Number(product.id), product.name)}
+              className="text-red-500 hover:text-red-700 transition duration-300"
+            >
+              <Transition
+                show={true}
+                enter="transition-opacity duration-200"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="transition-opacity duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                {isInWishlist ? (
+                  <HeartSolidIcon className="h-7 w-7" />
+                ) : (
+                  <HeartIcon className="h-7 w-7" />
+                )}
+              </Transition>
             </button>
           </div>
         </div>
       </div>
-
-      {/* Cart item count display */}
-      {/*<div className="fixed bottom-0 right-0 m-4 p-4 bg-indigo-600 text-white rounded-full text-lg">
-        Cart: {cartCount} item{cartCount !== 1 ? "s" : ""}
-      </div>*/}
     </div>
   );
 };
