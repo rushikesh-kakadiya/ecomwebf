@@ -17,6 +17,7 @@ Follow these steps to set up and run **ecomweb** locally:
 ### 1️⃣ Clone the Repository
 ```bash
 mkdir ecomwebsite
+cd ecomwebsite
 git clone https://github.com/rushikesh-kakadiya/ecomwebf.git
 git clone https://github.com/rushikesh-kakadiya/ecomweb.git
 ```
