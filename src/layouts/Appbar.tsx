@@ -68,7 +68,7 @@ export default function Appbar() {
     <div className="bg-white">
       <header className="relative">
         {/* Announcement Banner */}
-        <p className="flex h-10 items-center justify-center bg-indigo-600 text-sm font-medium text-white">
+        <p className="flex h-10 items-center justify-center bg-gray-800 text-sm font-medium text-white">
           Free shipping on all orders above ₹1000!
         </p>
 
@@ -162,7 +162,7 @@ export default function Appbar() {
               {/* Cart Icon */}
               <div
                 onClick={() => navigate("/cart")}
-                className="relative flex items-center justify-center p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+                className="relative flex items-center justify-center p-2 rounded-full bg-gray-600 text-white hover:bg-red-700 cursor-pointer"
                 title="View Cart"
               >
                 <ShoppingCart className="w-6 h-6" />

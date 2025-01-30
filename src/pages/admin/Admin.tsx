@@ -267,7 +267,7 @@ const Dashboard = () => {
 
         <button
           onClick={editingProduct ? handleUpdateProduct : createProduct}
-          className="bg-green-500 text-white p-2 rounded mt-2"
+          className="bg-gray-500 text-white p-2 rounded mt-2"
         >
           {editingProduct ? "Update Product" : "Add Product"}
         </button>
@@ -301,7 +301,7 @@ const Dashboard = () => {
 
         <button
           onClick={createCategory}
-          className="bg-blue-500 text-white p-2 rounded mt-2"
+          className="bg-gray-500 text-white p-2 rounded mt-2"
         >
           Add Category
         </button>
@@ -327,7 +327,7 @@ const Dashboard = () => {
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleEditProduct(product)}
-                    className="bg-blue-500 text-white p-1 rounded mr-2"
+                    className="bg-gray-500 text-white p-1 rounded mr-2"
                   >
                     Edit
                   </button>

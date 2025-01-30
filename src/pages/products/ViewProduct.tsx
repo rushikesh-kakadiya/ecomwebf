@@ -84,7 +84,7 @@ const ViewProduct = () => {
           {/* Buttons: Add to Cart & Wishlist */}
           <div className="mt-6 flex items-center space-x-4">
             <button
-              className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700"
+              className="bg-black text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-500"
               onClick={() => addToCart(product.id)} // Call addToCart from hook
             >
               Add to Cart

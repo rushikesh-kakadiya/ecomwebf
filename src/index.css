@@ -18,7 +18,7 @@ body {
   min-height: 100vh;
 
   /* Tailwind gradient class utilities applied */
-  @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500;
+  @apply bg-gradient-to-r from-gray-400 via-gray-400 to-gray-400;
 }
 
 a {

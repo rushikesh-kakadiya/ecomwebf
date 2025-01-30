@@ -71,8 +71,8 @@ const Products = () => {
             onClick={() => handleCategoryFilter(null)}
             className={`cursor-pointer p-2 rounded ${
               selectedCategory === null
-                ? "bg-indigo-600 text-white"
-                : "hover:bg-gray-200"
+                ? "bg-gray-600 text-white"
+                : "hover:bg-red-200"
             }`}
           >
             All Categories
@@ -83,8 +83,8 @@ const Products = () => {
               onClick={() => handleCategoryFilter(category)}
               className={`cursor-pointer p-2 rounded ${
                 selectedCategory === category
-                  ? "bg-indigo-600 text-white"
-                  : "hover:bg-gray-200"
+                  ? "bg-gray-600 text-white"
+                  : "hover:bg-red-200"
               }`}
             >
               {category}
@@ -170,7 +170,7 @@ const ProductCard = ({
           e.preventDefault();
           addToCart(product.id);
         }}
-        className="absolute bottom-3 right-3 bg-indigo-600 text-white p-2 rounded-full shadow-md hover:bg-indigo-700 transition duration-300"
+        className="absolute bottom-3 right-3 bg-gray-600 text-white p-2 rounded-full shadow-md hover:bg-red-700 transition duration-300"
       >
         <ShoppingCartIcon className="h-6 w-6" />
       </button>

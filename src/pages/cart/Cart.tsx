@@ -93,7 +93,9 @@ const CartPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-gray-100 min-h-screen">
+  
+    <div className="max-w-5xl mx-auto p-6 bg-gray-100 min-h-screen" >
+       <div className="min-h-screen bg-gradient-to-r from-gray-200 via-gray-400 to-gray-200 p-6">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">Shopping Cart</h1>
 
       {cartItems.length > 0 ? (
@@ -145,7 +147,7 @@ const CartPage: React.FC = () => {
 
                 {/* Delete item */}
                 <button
-                  className="text-red-600 hover:text-red-700"
+                  className="text-gray-600 hover:text-gray-700"
                   onClick={() => deleteCartItem(item.id)}
                 >
                   Delete
@@ -177,7 +179,7 @@ const CartPage: React.FC = () => {
                 .toFixed(2)}
             </p>
             <button
-              className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+              className="w-full mt-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
               disabled={cartItems.filter((item) => item.isSelected).length === 0}
               onClick={() => navigate("/CheckOut")}
             >
@@ -193,6 +195,7 @@ const CartPage: React.FC = () => {
           </p>
         </div>
       )}
+    </div>
     </div>
   );
 };

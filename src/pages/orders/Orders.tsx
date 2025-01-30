@@ -94,7 +94,7 @@ const Orders: React.FC = () => {
       {orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full border-collapse bg-white text-black rounded-lg shadow-md">
           <thead>
             <tr>
               <th className="border border-gray-300 px-4 py-2">Order ID</th>
