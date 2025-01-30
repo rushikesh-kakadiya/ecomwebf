@@ -9,8 +9,8 @@ export default defineConfig({
         enabled: true // For making sure that the PWA is testable from the Local dev environment
       },
       manifest: {
-        name: "rankApp",
-        short_name: "rankApp",
+        name: "ADDA",
+        short_name: "ADDA",
         icons: [
           {
             "src": "/favicon.ico",

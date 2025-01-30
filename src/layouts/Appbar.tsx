@@ -9,6 +9,7 @@ import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { API_ENDPOINT } from "../config/constants";
+import Logo from "../assets/image.png"
 
 interface NavigationItem {
   name: string;
@@ -82,8 +83,8 @@ export default function Appbar() {
             <div className="flex items-center">
               <a href="/" className="flex-shrink-0">
                 <img
-                  src="../../public/image.png"
-                  alt="Adaa Logo"
+                  src={Logo}
+                  alt="Adaa"
                   className="h-8 w-auto"
                 />
               </a>
