@@ -64,6 +64,13 @@ Your e-commerce website should now be running locally! 🎉
 
 ---
 
+## 🌟 Admin credentials
+
+**email** : "r@a.com"
+**Password** : "1"
+
+---
+
 ## 🌟 Key Features
 
 ✅ **Automated Product Slider** - Enhances the UI with a smooth auto-scrolling product showcase.  
