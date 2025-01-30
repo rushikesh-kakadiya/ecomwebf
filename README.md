@@ -1,4 +1,4 @@
-# 🛍️ ecomweb - The Future of Online Shopping
+# 🛍️ ecomweb - The Online Shopping WebApp
 
 Welcome to **ecomweb**, a modern, high-performance e-commerce platform designed to deliver a seamless shopping experience. Built with cutting-edge technologies, **ecomweb** ensures a fast, secure, and scalable solution for online businesses.
 
@@ -16,29 +16,34 @@ Follow these steps to set up and run **ecomweb** locally:
 
 ### 1️⃣ Clone the Repository
 ```bash
+mkdir ecomwebsite
+git clone https://github.com/rushikesh-kakadiya/ecomwebf.git
 git clone https://github.com/rushikesh-kakadiya/ecomweb.git
-cd ecomweb
 ```
 
 ### 2️⃣ Install Dependencies
 #### Backend (Node.js + Express + PostgreSQL)
 ```bash
-cd backend
+cd ecomweb
 npm install
 ```
 
 #### Frontend (Vite + TypeScript)
 ```bash
-cd ../frontend
+cd ../ecomwebf
 npm install
 ```
 
 ### 3️⃣ Set Up Environment Variables
 Create a `.env` file in both `backend` and `frontend` directories and configure necessary environment variables.
+For frontend : VITE_API_ENDPOINT = "backend_url", VITE_STRIPE_KEY = "stripe_publication_key"
+For backend : FURL = "frontend_url", "secret_key" = "stripe_secreat_key"
 
 ### 4️⃣ Start the Development Servers
 #### Backend
 ```bash
+npx sequelize-cli db:create
+npx sequelize-cli db:migrate
 npm run start
 ```
 
@@ -48,6 +53,13 @@ npm run dev
 ```
 
 Your e-commerce website should now be running locally! 🎉
+
+---
+
+## 🌍 Live Demo
+
+🔗 **Frontend Hosting:** [https://ecomwebf.netlify.app](#)  
+🔗 **Backend Hosting:** [https://ecomweb-2k04.onrender.com](#)  
 
 ---
 
