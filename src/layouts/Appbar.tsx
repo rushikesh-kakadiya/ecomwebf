@@ -9,7 +9,7 @@ import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { API_ENDPOINT } from "../config/constants";
-import Logo from "../assets/image.png"
+import Logo from "../../public/image.png"
 
 interface NavigationItem {
   name: string;
