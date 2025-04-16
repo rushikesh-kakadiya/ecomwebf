@@ -90,21 +90,9 @@ Your e-commerce website should now be running locally! 🎉
 | **Backend** | Node.js + Express |
 | **Database** | PostgreSQL |
 | **Styling** | Tailwind CSS |
-| **State Management** | React Context API / Redux (if needed) |
+| **State Management** | React Context API / Redux |
 | **Authentication** | JWT / OAuth |
 | **Deployment** | Docker, Vercel, or Heroku |
-
----
-
-## 🎯 Contributing
-
-We welcome contributions! Feel free to **fork the repo**, make improvements, and submit a **pull request**.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.
 
 ---
 
